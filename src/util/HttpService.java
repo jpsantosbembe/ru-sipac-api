@@ -14,14 +14,14 @@ public class HttpService {
             return response;
         }
     }
-    public Response fazerRequisicaoHttpGET(String url, String cookie) throws IOException {
+    public String fazerRequisicaoHttpGET(String url, String cookie) throws IOException {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
                 .url(url)
                 .addHeader("Cookie", cookie)
                 .build();
         try (Response response = client.newCall(request).execute()) {
-            return response;
+            return response.body().string();
         }
     }
     public String fazerRequisicaoHttpPOST(String url, String postbody, String cookie) throws IOException {

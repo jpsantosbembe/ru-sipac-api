@@ -19,14 +19,17 @@ public class ControladorLogin {
                 "width=1920&height=1080&login=" + usuario.getCredenciais().getUsuario() + "&senha=" + usuario.getCredenciais().getSenha(),
                 cookie);
 
-        String strResponseBody = httpService.fazerRequisicaoHttpPOST("https://sipac.ufopa.edu.br/sipac/portal_aluno/index.jsf",
+        String strResponseBody1 = httpService.fazerRequisicaoHttpPOST("https://sipac.ufopa.edu.br/sipac/portal_aluno/index.jsf",
                 "formmenuadm=formmenuadm&jscook_action=formmenuadm_menuaaluno_menu%3AA%5D%23%7BsaldoCartao.iniciar%7D&javax.faces.ViewState=j_id1",
                 cookie);
+
+        String strResponseBody2 = httpService.fazerRequisicaoHttpGET("https://sipac.ufopa.edu.br/sipac/portal_aluno/index.jsf", cookie);
+        //System.out.println(strResponseBody2);
 
         System.out.println("--------------------------------------------------------------------------------------------");
         //System.out.println(strResponseBody);
         String regex = "<td\\s*.*>(\\s*.*)<\\/td>";
-        final String string = strResponseBody;
+        final String string = strResponseBody1;
         Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
         Matcher matcher = pattern.matcher(string);
 
@@ -70,5 +73,14 @@ public class ControladorLogin {
             }
             count++;
         }
+
+        regex = "http[s]?[\\w\\S]+\\.jpg";
+        pattern = Pattern.compile(regex, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+        matcher = pattern.matcher(strResponseBody2);
+
+        while (matcher.find()) {
+            usuario.getPerfil().setURLFoto(matcher.group(0));
+        }
+
     }
 }
