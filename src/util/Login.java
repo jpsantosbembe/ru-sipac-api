@@ -1,24 +1,13 @@
 package util;
 
 import controller.ControladorUsuario;
+import helper.AnalisadorRegex;
 import model.Credenciais;
 import okhttp3.Response;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Login{
-
-    private String nomeCompleto;
-    private String codigo;
-    private String situacaoDoVinculo;
-    private String tipoDeVinculo;
-    private String strQRCode;
-    private int saldo;
-    private String URLPerfil;
-
-
     public void fazerLogin(Credenciais credenciais) throws IOException {
         String cookie = obterCookie();
         autenticarUsuario(credenciais, cookie);
@@ -29,72 +18,53 @@ public class Login{
 
         System.out.println("--------------------------------------------------------------------------------------------");
 
-        String regex = "<th\\s*.*>Nome:</th>\\s\\W+<td\\s*.*>(\\s*.*)</td>";
-        Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(strResponseBody1);
-
-        while (matcher.find()) {
-            for (int i = 1; i <= matcher.groupCount(); i++) {
-                nomeCompleto = matcher.group(i);
-            }
+        String nomeCompleto;
+        try {
+            nomeCompleto = AnalisadorRegex.localizarOcorrencia(ColecaoRegex.NOME_COMPLETO, strResponseBody1);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
-        regex = "<th\\s*.*>C&#243;digo:</th>\\s\\W+<td\\s*.*>(\\s*.*)</td>";
-        pattern = Pattern.compile(regex, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
-        matcher = pattern.matcher(strResponseBody1);
-
-        while (matcher.find()) {
-            for (int i = 1; i <= matcher.groupCount(); i++) {
-                codigo = matcher.group(i);
-            }
+        String codigo;
+        try {
+            codigo = AnalisadorRegex.localizarOcorrencia(ColecaoRegex.CODIGO, strResponseBody1);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
-        regex = "<th\\s*.*>Situa&#231;&#227;o:</th>\\s\\W+<td\\s*.*>(\\s*.*)</td>";
-        pattern = Pattern.compile(regex, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
-        matcher = pattern.matcher(strResponseBody1);
-
-        while (matcher.find()) {
-            for (int i = 1; i <= matcher.groupCount(); i++) {
-                situacaoDoVinculo = matcher.group(i);
-            }
+        String situacaoDoVinculo;
+        try {
+            situacaoDoVinculo = AnalisadorRegex.localizarOcorrencia(ColecaoRegex.SITUACAO, strResponseBody1);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
-        regex = "<th\\s*.*>Tipo de V&#237;nculo:</th>\\s\\W+<td\\s*.*>(\\s*.*)</td>";
-        pattern = Pattern.compile(regex, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
-        matcher = pattern.matcher(strResponseBody1);
-
-        while (matcher.find()) {
-            for (int i = 1; i <= matcher.groupCount(); i++) {
-                tipoDeVinculo = matcher.group(i);
-            }
+        String tipoDeVinculo;
+        try {
+            tipoDeVinculo = AnalisadorRegex.localizarOcorrencia(ColecaoRegex.TIPO_DE_VINCULO, strResponseBody1);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
-        regex = "<th\\s*.*>Total de Refei&#231;&#245;es:</th>\\s\\W+<td>\\s\\W+<span\\s*.*>(\\d+)</span>\\s\\W+</td>";
-        pattern = Pattern.compile(regex, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
-        matcher = pattern.matcher(strResponseBody1);
-
-        while (matcher.find()) {
-            for (int i = 1; i <= matcher.groupCount(); i++) {
-                saldo = Integer.parseInt(matcher.group(i));
-            }
+        int saldo;
+        try {
+            saldo = Integer.parseInt(AnalisadorRegex.localizarOcorrencia(ColecaoRegex.SALDO, strResponseBody1));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
-        regex = "/sipac/QRCode\\?codigo=(.+)&tamanho=";
-        pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
-        matcher = pattern.matcher(strResponseBody1);
-
-        while (matcher.find()) {
-            for (int i = 1; i <= matcher.groupCount(); i++) {
-                strQRCode = matcher.group(i);
-            }
+        String strQRCode;
+        try {
+            strQRCode = AnalisadorRegex.localizarOcorrencia(ColecaoRegex.STRING_QRCODE, strResponseBody1);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
-        regex = "http[s]?[\\w\\S]+\\.jpg";
-        pattern = Pattern.compile(regex, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
-        matcher = pattern.matcher(strResponseBody2);
-
-        while (matcher.find()) {
-            URLPerfil = matcher.group(0);
+        String URLPerfil;
+        try {
+            URLPerfil = AnalisadorRegex.localizarOcorrencia(ColecaoRegex.FOTO_DE_PERFIL, strResponseBody2);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         new ControladorUsuario().criarNovoUsuario(
@@ -111,7 +81,7 @@ public class Login{
     }
     private String obterCookie() throws IOException {
         HttpService httpService = new HttpService();
-        Response response = httpService.fazerRequisicaoHttpGET(Endpoints.HOMEPAGE_SIPAC);
+        Response response = httpService.fazerRequisicaoHttpGET(Endpoints.PAGINA_INICIAL_SIPAC);
         int index = Objects.requireNonNull(response.headers().get("Set-Cookie")).indexOf(";");
         return Objects.requireNonNull(response.headers().get("Set-Cookie")).substring(0,index);
     }
