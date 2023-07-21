@@ -2,7 +2,6 @@ import model.Credenciais;
 import util.Login;
 import controller.ControladorUsuario;
 import model.Usuario;
-import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
@@ -12,7 +11,7 @@ public class Main {
         );
         try {
             new Login().fazerLogin(credenciais);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 

@@ -8,5 +8,6 @@ public class ColecaoRegex {
     public static final String SALDO = "<th\\s*.*>Total de Refei&#231;&#245;es:</th>\\s\\W+<td>\\s\\W+<span\\s*.*>(\\d+)</span>\\s\\W+</td>";
     public static final String STRING_QRCODE = "/sipac/QRCode\\?codigo=(.+)&tamanho=";
     public static final String FOTO_DE_PERFIL = "(http[s]?[\\w\\S]+\\.jpg)";
+    public static final String USUARIO_SENHA_INVALIDO = "<b>\\s+(Usuário e\\/ou senha inválidos)\\s+<\\/b>";
 
 }

@@ -8,15 +8,15 @@ import java.io.IOException;
 import java.util.Objects;
 
 public class Login{
-    public void fazerLogin(Credenciais credenciais) throws IOException {
+    public void fazerLogin(Credenciais credenciais) throws Exception {
         String cookie = obterCookie();
-        autenticarUsuario(credenciais, cookie);
+        String paginaAuth = autenticarUsuario(credenciais, cookie);
         String strResponseBody1 = obterPaginaSaldoCartaoRU(cookie);
         String strResponseBody2 = obterPaginaPerfilUsuario(cookie);
 
-        System.out.println(strResponseBody1);
-
-        System.out.println("--------------------------------------------------------------------------------------------");
+        if (AnalisadorRegex.localizarOcorrencia(ColecaoRegex.USUARIO_SENHA_INVALIDO, paginaAuth) != null) {
+            throw new Exception("Usuario e/ou senha invalidos");
+        }
 
         String nomeCompleto;
         try {
@@ -48,7 +48,7 @@ public class Login{
 
         int saldo;
         try {
-            saldo = Integer.parseInt(AnalisadorRegex.localizarOcorrencia(ColecaoRegex.SALDO, strResponseBody1));
+            saldo = Integer.parseInt(Objects.requireNonNull(AnalisadorRegex.localizarOcorrencia(ColecaoRegex.SALDO, strResponseBody1)));
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -85,9 +85,9 @@ public class Login{
         int index = Objects.requireNonNull(response.headers().get("Set-Cookie")).indexOf(";");
         return Objects.requireNonNull(response.headers().get("Set-Cookie")).substring(0,index);
     }
-    private void autenticarUsuario(Credenciais credenciais, String cookie) throws IOException {
+    private String autenticarUsuario(Credenciais credenciais, String cookie) throws IOException {
         HttpService httpService = new HttpService();
-        httpService.fazerRequisicaoHttpPOST(
+        return httpService.fazerRequisicaoHttpPOST(
                 Endpoints.LOGON_SIPAC + cookie.toLowerCase(),
                 "width=1920&height=1080&login=" + credenciais.getUsuario() + "&senha=" + credenciais.getSenha(),
                 cookie);
