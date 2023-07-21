@@ -1,3 +1,4 @@
+import model.Credenciais;
 import util.Login;
 import controller.ControladorUsuario;
 import model.Usuario;
@@ -5,23 +6,17 @@ import java.io.IOException;
 
 public class Main {
     public static void main(String[] args) {
-        Usuario usuario = new ControladorUsuario().criarNovoUsuario(
-                "Fulano Silvano Da Selvageria",
-                "Discente",
-                "Ativo",
-                "uri://example.com/pic.png",
-                "0000",
-                10,
-                "ead3dsisbdshb456ujbdhjqjq776",
-                "usuario",
-            "senha"
+        Credenciais credenciais = new Credenciais(
+                args[0],
+                args[1]
         );
-
         try {
-            new Login().fazerLogin(usuario);
+            new Login().fazerLogin(credenciais);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+
+        Usuario usuario = new ControladorUsuario().obterUsuario();
 
         System.out.println(usuario.getPerfil().getNomeCompleto());
         System.out.println(usuario.getPerfil().getTipoDeVinculo());

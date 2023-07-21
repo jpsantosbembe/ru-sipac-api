@@ -1,21 +1,31 @@
 package util;
 
-import model.Usuario;
+import controller.ControladorUsuario;
+import model.Credenciais;
 import okhttp3.Response;
 import java.io.IOException;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Login {
-    public void fazerLogin(Usuario usuario) throws IOException {
+public class Login{
+
+    private String nomeCompleto;
+    private String codigo;
+    private String situacaoDoVinculo;
+    private String tipoDeVinculo;
+    private String strQRCode;
+    private int saldo;
+    private String URLPerfil;
+
+
+    public void fazerLogin(Credenciais credenciais) throws IOException {
         String cookie = obterCookie();
-        autenticarUsuario(usuario, cookie);
+        autenticarUsuario(credenciais, cookie);
         String strResponseBody1 = obterPaginaSaldoCartaoRU(cookie);
         String strResponseBody2 = obterPaginaPerfilUsuario(cookie);
 
         System.out.println("--------------------------------------------------------------------------------------------");
-        //System.out.println(strResponseBody);
         String regex = "<td\\s*.*>(\\s*.*)</td>";
         Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
         Matcher matcher = pattern.matcher(strResponseBody1);
@@ -23,12 +33,11 @@ public class Login {
         int count = 0;
         while (matcher.find()) {
             for (int i = 1; i <= matcher.groupCount(); i++) {
-                //System.out.println("Group " + i + ": " + matcher.group(i) + " --> "+ count);
                 switch (count) {
-                    case 0: usuario.getPerfil().setNomeCompleto(matcher.group(i));
-                    case 1: usuario.getCarteira().setCodigo(matcher.group(i));
-                    case 2: usuario.getPerfil().setSituacaoDoVinculo(matcher.group(i));
-                    case 3: usuario.getPerfil().setTipoDeVinculo(matcher.group(i));
+                    case 0: nomeCompleto = matcher.group(i);
+                    case 1: codigo = matcher.group(i);
+                    case 2: situacaoDoVinculo = matcher.group(i);
+                    case 3: tipoDeVinculo = matcher.group(i);
 
                 }
             }
@@ -41,8 +50,7 @@ public class Login {
 
         while (matcher.find()) {
             for (int i = 1; i <= matcher.groupCount(); i++) {
-                //System.out.println("Group " + i + ": " + matcher.group(i));
-                usuario.getCarteira().setStrQRCode(matcher.group(i));
+                strQRCode = matcher.group(i);
             }
         }
 
@@ -55,7 +63,7 @@ public class Login {
             for (int i = 1; i <= matcher.groupCount(); i++) {
                 //System.out.println("Group " + i + ": " + matcher.group(i));
                 if (count == 0) {
-                    usuario.getCarteira().setSaldo(Integer.parseInt(matcher.group(i)));
+                    saldo = Integer.parseInt(matcher.group(i));
                 }
             }
             count++;
@@ -66,8 +74,20 @@ public class Login {
         matcher = pattern.matcher(strResponseBody2);
 
         while (matcher.find()) {
-            usuario.getPerfil().setURLFoto(matcher.group(0));
+            URLPerfil = matcher.group(0);
         }
+
+        new ControladorUsuario().criarNovoUsuario(
+                nomeCompleto,
+                tipoDeVinculo,
+                situacaoDoVinculo,
+                URLPerfil,
+                codigo,
+                saldo,
+                strQRCode,
+                credenciais.getUsuario(),
+                credenciais.getSenha()
+        );
     }
     private String obterCookie() throws IOException {
         HttpService httpService = new HttpService();
@@ -75,11 +95,11 @@ public class Login {
         int index = Objects.requireNonNull(response.headers().get("Set-Cookie")).indexOf(";");
         return Objects.requireNonNull(response.headers().get("Set-Cookie")).substring(0,index);
     }
-    private void autenticarUsuario(Usuario usuario, String cookie) throws IOException {
+    private void autenticarUsuario(Credenciais credenciais, String cookie) throws IOException {
         HttpService httpService = new HttpService();
         httpService.fazerRequisicaoHttpPOST(
                 Endpoints.LOGON_SIPAC + cookie.toLowerCase(),
-                "width=1920&height=1080&login=" + usuario.getCredenciais().getUsuario() + "&senha=" + usuario.getCredenciais().getSenha(),
+                "width=1920&height=1080&login=" + credenciais.getUsuario() + "&senha=" + credenciais.getSenha(),
                 cookie);
     }
     private String obterPaginaSaldoCartaoRU(String cookie) throws IOException {
