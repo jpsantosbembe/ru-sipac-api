@@ -5,7 +5,7 @@ import okhttp3.*;
 import java.io.IOException;
 import java.util.Objects;
 
-public class HttpService {
+public class ServicoHttp {
     public Response fazerRequisicaoHttpGET(String url) throws IOException {
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()

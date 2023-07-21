@@ -1,3 +1,5 @@
+import exception.ExcecaoErroDeConectividade;
+import exception.ExcecaoUsuarioSenhaInvalido;
 import model.Credenciais;
 import util.Login;
 import controller.ControladorUsuario;
@@ -11,7 +13,7 @@ public class Main {
         );
         try {
             new Login().fazerLogin(credenciais);
-        } catch (Exception e) {
+        } catch (ExcecaoErroDeConectividade | ExcecaoUsuarioSenhaInvalido e) {
             throw new RuntimeException(e);
         }
 

@@ -46,10 +46,11 @@ public class Login{
     }
     private String obterCookie() throws ExcecaoErroDeConectividade{
         try {
-            HttpService httpService = new HttpService();
-            Response response = httpService.fazerRequisicaoHttpGET(Endpoints.PAGINA_INICIAL_SIPAC);
-            int index = Objects.requireNonNull(response.headers().get("Set-Cookie")).indexOf(";");
-            return Objects.requireNonNull(response.headers().get("Set-Cookie")).substring(0,index);
+            ServicoHttp servicoHttp = new ServicoHttp();
+            try (Response response = servicoHttp.fazerRequisicaoHttpGET(Endpoints.PAGINA_INICIAL_SIPAC)) {
+                int index = Objects.requireNonNull(response.headers().get("Set-Cookie")).indexOf(";");
+                return Objects.requireNonNull(response.headers().get("Set-Cookie")).substring(0, index);
+            }
         } catch (IOException e) {
             throw new ExcecaoErroDeConectividade();
         }
@@ -57,8 +58,8 @@ public class Login{
     }
     private void autenticarUsuario(Credenciais credenciais, String cookie) throws ExcecaoErroDeConectividade, ExcecaoUsuarioSenhaInvalido {
         try {
-            HttpService httpService = new HttpService();
-            String respostaSipac = httpService.fazerRequisicaoHttpPOST(
+            ServicoHttp servicoHttp = new ServicoHttp();
+            String respostaSipac = servicoHttp.fazerRequisicaoHttpPOST(
                     Endpoints.LOGON_SIPAC + cookie.toLowerCase(),
                     "width=1920&height=1080&login=" + credenciais.getUsuario() + "&senha=" + credenciais.getSenha(),
                     cookie);
@@ -72,8 +73,8 @@ public class Login{
     }
     private String obterPaginaSaldoCartaoRU(String cookie) throws ExcecaoErroDeConectividade {
         try {
-            HttpService httpService = new HttpService();
-            return httpService.fazerRequisicaoHttpPOST(Endpoints.SALDO_RU_SIPAC,
+            ServicoHttp servicoHttp = new ServicoHttp();
+            return servicoHttp.fazerRequisicaoHttpPOST(Endpoints.SALDO_RU_SIPAC,
                     "formmenuadm=formmenuadm&jscook_action=formmenuadm_menuaaluno_menu%3AA%5D%23%7BsaldoCartao.iniciar%7D&javax.faces.ViewState=j_id1",
                     cookie);
         } catch (IOException e) {
@@ -83,8 +84,8 @@ public class Login{
     }
     private String obterPaginaPerfilUsuario(String cookie) throws ExcecaoErroDeConectividade {
         try {
-            HttpService httpService = new HttpService();
-            return httpService.fazerRequisicaoHttpGET(Endpoints.PORTAL_DO_ALUNO_SIPAC, cookie);
+            ServicoHttp servicoHttp = new ServicoHttp();
+            return servicoHttp.fazerRequisicaoHttpGET(Endpoints.PORTAL_DO_ALUNO_SIPAC, cookie);
         } catch (IOException e) {
             throw new ExcecaoErroDeConectividade();
         }
