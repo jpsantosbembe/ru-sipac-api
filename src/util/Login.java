@@ -1,37 +1,24 @@
-package controller;
+package util;
 
 import model.Usuario;
 import okhttp3.Response;
-import util.HttpService;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ControladorLogin {
+public class Login {
     public void fazerLogin(Usuario usuario) throws IOException {
-        HttpService httpService = new HttpService();
-        Response response = httpService.fazerRequisicaoHttpGET("https://sipac.ufopa.edu.br/sipac/");
-        int index = response.headers().get("Set-Cookie").indexOf(";");
-        String cookie = response.headers().get("Set-Cookie").substring(0,index);
-        //System.out.println(cookie);
-
-        httpService.fazerRequisicaoHttpPOST("https://sipac.ufopa.edu.br/sipac/logon.do;" + cookie.toLowerCase(),
-                "width=1920&height=1080&login=" + usuario.getCredenciais().getUsuario() + "&senha=" + usuario.getCredenciais().getSenha(),
-                cookie);
-
-        String strResponseBody1 = httpService.fazerRequisicaoHttpPOST("https://sipac.ufopa.edu.br/sipac/portal_aluno/index.jsf",
-                "formmenuadm=formmenuadm&jscook_action=formmenuadm_menuaaluno_menu%3AA%5D%23%7BsaldoCartao.iniciar%7D&javax.faces.ViewState=j_id1",
-                cookie);
-
-        String strResponseBody2 = httpService.fazerRequisicaoHttpGET("https://sipac.ufopa.edu.br/sipac/portal_aluno/index.jsf", cookie);
-        //System.out.println(strResponseBody2);
+        String cookie = obterCookie();
+        autenticarUsuario(usuario, cookie);
+        String strResponseBody1 = obterPaginaSaldoCartaoRU(cookie);
+        String strResponseBody2 = obterPaginaPerfilUsuario(cookie);
 
         System.out.println("--------------------------------------------------------------------------------------------");
         //System.out.println(strResponseBody);
-        String regex = "<td\\s*.*>(\\s*.*)<\\/td>";
-        final String string = strResponseBody1;
+        String regex = "<td\\s*.*>(\\s*.*)</td>";
         Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
-        Matcher matcher = pattern.matcher(string);
+        Matcher matcher = pattern.matcher(strResponseBody1);
 
         int count = 0;
         while (matcher.find()) {
@@ -50,7 +37,7 @@ public class ControladorLogin {
 
         regex = "/sipac/QRCode\\?codigo=(.+)&tamanho=";
         pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
-        matcher = pattern.matcher(string);
+        matcher = pattern.matcher(strResponseBody1);
 
         while (matcher.find()) {
             for (int i = 1; i <= matcher.groupCount(); i++) {
@@ -59,9 +46,9 @@ public class ControladorLogin {
             }
         }
 
-        regex = "<span\\s*.*>(\\d+)<\\/span>";
+        regex = "<span\\s*.*>(\\d+)</span>";
         pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
-        matcher = pattern.matcher(string);
+        matcher = pattern.matcher(strResponseBody1);
 
         count = 0;
         while (matcher.find()) {
@@ -81,6 +68,28 @@ public class ControladorLogin {
         while (matcher.find()) {
             usuario.getPerfil().setURLFoto(matcher.group(0));
         }
-
+    }
+    private String obterCookie() throws IOException {
+        HttpService httpService = new HttpService();
+        Response response = httpService.fazerRequisicaoHttpGET("https://sipac.ufopa.edu.br/sipac/");
+        int index = Objects.requireNonNull(response.headers().get("Set-Cookie")).indexOf(";");
+        return Objects.requireNonNull(response.headers().get("Set-Cookie")).substring(0,index);
+    }
+    private void autenticarUsuario(Usuario usuario, String cookie) throws IOException {
+        HttpService httpService = new HttpService();
+        httpService.fazerRequisicaoHttpPOST(
+                "https://sipac.ufopa.edu.br/sipac/logon.do;" + cookie.toLowerCase(),
+                "width=1920&height=1080&login=" + usuario.getCredenciais().getUsuario() + "&senha=" + usuario.getCredenciais().getSenha(),
+                cookie);
+    }
+    private String obterPaginaSaldoCartaoRU(String cookie) throws IOException {
+        HttpService httpService = new HttpService();
+        return httpService.fazerRequisicaoHttpPOST("https://sipac.ufopa.edu.br/sipac/portal_aluno/index.jsf",
+                "formmenuadm=formmenuadm&jscook_action=formmenuadm_menuaaluno_menu%3AA%5D%23%7BsaldoCartao.iniciar%7D&javax.faces.ViewState=j_id1",
+                cookie);
+    }
+    private String obterPaginaPerfilUsuario(String cookie) throws IOException {
+        HttpService httpService = new HttpService();
+        return httpService.fazerRequisicaoHttpGET("https://sipac.ufopa.edu.br/sipac/portal_aluno/index.jsf", cookie);
     }
 }

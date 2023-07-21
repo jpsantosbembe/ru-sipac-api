@@ -3,6 +3,7 @@ package util;
 import okhttp3.*;
 
 import java.io.IOException;
+import java.util.Objects;
 
 public class HttpService {
     public Response fazerRequisicaoHttpGET(String url) throws IOException {
@@ -21,7 +22,7 @@ public class HttpService {
                 .addHeader("Cookie", cookie)
                 .build();
         try (Response response = client.newCall(request).execute()) {
-            return response.body().string();
+            return Objects.requireNonNull(response.body()).string();
         }
     }
     public String fazerRequisicaoHttpPOST(String url, String postbody, String cookie) throws IOException {
@@ -54,7 +55,7 @@ public class HttpService {
                 .addHeader("Cookie", cookie)
                 .build();
         try (Response response = client.newCall(request).execute()) {
-            return response.body().string();
+            return Objects.requireNonNull(response.body()).string();
         }
     }
 }
