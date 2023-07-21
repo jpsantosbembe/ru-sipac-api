@@ -71,25 +71,25 @@ public class Login {
     }
     private String obterCookie() throws IOException {
         HttpService httpService = new HttpService();
-        Response response = httpService.fazerRequisicaoHttpGET("https://sipac.ufopa.edu.br/sipac/");
+        Response response = httpService.fazerRequisicaoHttpGET(Endpoints.HOMEPAGE_SIPAC);
         int index = Objects.requireNonNull(response.headers().get("Set-Cookie")).indexOf(";");
         return Objects.requireNonNull(response.headers().get("Set-Cookie")).substring(0,index);
     }
     private void autenticarUsuario(Usuario usuario, String cookie) throws IOException {
         HttpService httpService = new HttpService();
         httpService.fazerRequisicaoHttpPOST(
-                "https://sipac.ufopa.edu.br/sipac/logon.do;" + cookie.toLowerCase(),
+                Endpoints.LOGON_SIPAC + cookie.toLowerCase(),
                 "width=1920&height=1080&login=" + usuario.getCredenciais().getUsuario() + "&senha=" + usuario.getCredenciais().getSenha(),
                 cookie);
     }
     private String obterPaginaSaldoCartaoRU(String cookie) throws IOException {
         HttpService httpService = new HttpService();
-        return httpService.fazerRequisicaoHttpPOST("https://sipac.ufopa.edu.br/sipac/portal_aluno/index.jsf",
+        return httpService.fazerRequisicaoHttpPOST(Endpoints.SALDO_RU_SIPAC,
                 "formmenuadm=formmenuadm&jscook_action=formmenuadm_menuaaluno_menu%3AA%5D%23%7BsaldoCartao.iniciar%7D&javax.faces.ViewState=j_id1",
                 cookie);
     }
     private String obterPaginaPerfilUsuario(String cookie) throws IOException {
         HttpService httpService = new HttpService();
-        return httpService.fazerRequisicaoHttpGET("https://sipac.ufopa.edu.br/sipac/portal_aluno/index.jsf", cookie);
+        return httpService.fazerRequisicaoHttpGET(Endpoints.PORTAL_DO_ALUNO_SIPAC, cookie);
     }
 }
