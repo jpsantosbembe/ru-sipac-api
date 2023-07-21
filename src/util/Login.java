@@ -25,23 +25,58 @@ public class Login{
         String strResponseBody1 = obterPaginaSaldoCartaoRU(cookie);
         String strResponseBody2 = obterPaginaPerfilUsuario(cookie);
 
+        System.out.println(strResponseBody1);
+
         System.out.println("--------------------------------------------------------------------------------------------");
-        String regex = "<td\\s*.*>(\\s*.*)</td>";
-        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
+
+        String regex = "<th\\s*.*>Nome:</th>\\s\\W+<td\\s*.*>(\\s*.*)</td>";
+        Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
         Matcher matcher = pattern.matcher(strResponseBody1);
 
-        int count = 0;
         while (matcher.find()) {
             for (int i = 1; i <= matcher.groupCount(); i++) {
-                switch (count) {
-                    case 0: nomeCompleto = matcher.group(i);
-                    case 1: codigo = matcher.group(i);
-                    case 2: situacaoDoVinculo = matcher.group(i);
-                    case 3: tipoDeVinculo = matcher.group(i);
-
-                }
+                nomeCompleto = matcher.group(i);
             }
-            count++;
+        }
+
+        regex = "<th\\s*.*>C&#243;digo:</th>\\s\\W+<td\\s*.*>(\\s*.*)</td>";
+        pattern = Pattern.compile(regex, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+        matcher = pattern.matcher(strResponseBody1);
+
+        while (matcher.find()) {
+            for (int i = 1; i <= matcher.groupCount(); i++) {
+                codigo = matcher.group(i);
+            }
+        }
+
+        regex = "<th\\s*.*>Situa&#231;&#227;o:</th>\\s\\W+<td\\s*.*>(\\s*.*)</td>";
+        pattern = Pattern.compile(regex, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+        matcher = pattern.matcher(strResponseBody1);
+
+        while (matcher.find()) {
+            for (int i = 1; i <= matcher.groupCount(); i++) {
+                situacaoDoVinculo = matcher.group(i);
+            }
+        }
+
+        regex = "<th\\s*.*>Tipo de V&#237;nculo:</th>\\s\\W+<td\\s*.*>(\\s*.*)</td>";
+        pattern = Pattern.compile(regex, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+        matcher = pattern.matcher(strResponseBody1);
+
+        while (matcher.find()) {
+            for (int i = 1; i <= matcher.groupCount(); i++) {
+                tipoDeVinculo = matcher.group(i);
+            }
+        }
+
+        regex = "<th\\s*.*>Total de Refei&#231;&#245;es:</th>\\s\\W+<td>\\s\\W+<span\\s*.*>(\\d+)</span>\\s\\W+</td>";
+        pattern = Pattern.compile(regex, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+        matcher = pattern.matcher(strResponseBody1);
+
+        while (matcher.find()) {
+            for (int i = 1; i <= matcher.groupCount(); i++) {
+                saldo = Integer.parseInt(matcher.group(i));
+            }
         }
 
         regex = "/sipac/QRCode\\?codigo=(.+)&tamanho=";
@@ -52,21 +87,6 @@ public class Login{
             for (int i = 1; i <= matcher.groupCount(); i++) {
                 strQRCode = matcher.group(i);
             }
-        }
-
-        regex = "<span\\s*.*>(\\d+)</span>";
-        pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.MULTILINE);
-        matcher = pattern.matcher(strResponseBody1);
-
-        count = 0;
-        while (matcher.find()) {
-            for (int i = 1; i <= matcher.groupCount(); i++) {
-                //System.out.println("Group " + i + ": " + matcher.group(i));
-                if (count == 0) {
-                    saldo = Integer.parseInt(matcher.group(i));
-                }
-            }
-            count++;
         }
 
         regex = "http[s]?[\\w\\S]+\\.jpg";
