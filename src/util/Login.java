@@ -5,9 +5,14 @@ import exception.ExcecaoErroDeConectividade;
 import exception.ExcecaoUsuarioSenhaInvalido;
 import helper.AnalisadorRegex;
 import model.Credenciais;
+import model.HistoricoTransacoes;
+import model.Transacao;
 import okhttp3.Response;
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Login{
     public void fazerLogin(Credenciais credenciais) throws ExcecaoUsuarioSenhaInvalido, ExcecaoErroDeConectividade {
@@ -16,6 +21,42 @@ public class Login{
         autenticarUsuario(credenciais, cookie);
         String strResponseBody1 = obterPaginaSaldoCartaoRU(cookie);
         String strResponseBody2 = obterPaginaPerfilUsuario(cookie);
+        System.out.println(strResponseBody1);
+
+        HistoricoTransacoes historico = new HistoricoTransacoes();
+
+        final String regex = "<tr class=\\\"\\w+\\\">\\s*<td><\\/td>\\s*<td style=\\\"text-align: center;\\\">\\s*(\\d{2}\\/\\d{2}\\/\\d{4})&nbsp;(\\d{2}:\\d{2})\\s*<\\/td>\\s*<td style=\\\"text-align: left;\\\" nowrap=\\\"nowrap\\\">\\s*((?:.+?)(?:&\\w+;)(?:.+))\\s+(?:\\(almo&ccedil;o\\))?\\s*<\\/td>\\s*<td style=\\\"text-align: right;\\\">\\s*<!-- 0 = TipoCompraCredito\\.COMPRA_GRU \\s*2 = TipoCompraCredito\\.Compra_PRESENCIAL-->\\s*(\\d+)\\s*<\\/td>\\s*(?:<!-- TipoCompraCredito\\.COMPENSACAO_GRU -->)?\\s*<td style=\\\"text-align: right;\\\">(\\d+)<\\/td>\\s*<td style=\\\"text-align: right; background-color: #ffff[ce][6c];\\\">\\s+(\\d+)\\s+<\\/td>\\s*<td style=\\\"text-align: right; background-color: #ffff[ce][6c];\\\">\\s*(\\d+)\\s*<\\/td>\\s*<td style=\\\"text-align: right; background-color: #ffff[ce][6c];\\\">\\s*(\\d+)\\s*<\\/td>\\s*<td style=\\\"text-align: right; background-color: #ffff[ce][6c];\\\">\\s*(\\d+)\\s*<\\/td>\\s*<\\/tr>";
+        final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
+        final Matcher matcher = pattern.matcher(strResponseBody1);
+
+        while (matcher.find()) {
+            Transacao transacao = new Transacao(
+                    matcher.group(1),
+                    matcher.group(2),
+                    matcher.group(3),
+                    matcher.group(4),
+                    matcher.group(5),
+                    matcher.group(6),
+                    matcher.group(7),
+                    matcher.group(8),
+                    matcher.group(9));
+            historico.adicionarTransacao(transacao);
+        }
+
+        List<Transacao> todasTransacoes = historico.getTransacoes();
+        System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+        System.out.printf("%-12s | %-10s | %-42s | %-17s | %-20s | %-20s | %-15s | %-12s%n",
+                "DATA", "HORA", "OPERACAO", "CREDITOS GERADOS", "CREDITOS A RECEBER",
+                "CREDITOS COMPENSADOS", "SALDO ANTERIOR", "SALDO ATUAL");
+        System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+
+        for (Transacao transacao : todasTransacoes) {
+            System.out.printf("%-12s | %-10s | %-42s | %-17s | %-20s | %-20s | %-15s | %-12s%n",
+                    transacao.getData(), transacao.getHora(), transacao.getNomeOperacao(),
+                    "        "+transacao.getCreditosGerados(), "          "+transacao.getCreditoReceber(),
+                    "          "+transacao.getCreditoCompensado(), "        "+transacao.getSaldoAnterior(),
+                    "        "+transacao.getSaldoAtual());
+        }
 
         String nomeCompleto;
         nomeCompleto = AnalisadorRegex.localizarOcorrencia(ColecaoRegex.NOME_COMPLETO, strResponseBody1);
