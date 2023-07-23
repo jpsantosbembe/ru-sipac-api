@@ -34,17 +34,17 @@ public class Main {
 
         List<Transacao> todasTransacoes = usuario.getHistoricoTransacoes().getTransacoes();
         System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
-        System.out.printf("%-12s | %-10s | %-42s | %-17s | %-20s | %-20s | %-15s | %-12s%n",
+        System.out.printf("%-12s | %-10s | %-42s | %-17s | %-20s | %-20s | %-15s | %-12s |%n",
                 "DATA", "HORA", "OPERACAO", "CREDITOS GERADOS", "CREDITOS A RECEBER",
                 "CREDITOS COMPENSADOS", "SALDO ANTERIOR", "SALDO ATUAL");
         System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
         for (Transacao transacao : todasTransacoes) {
-            System.out.printf("%-12s | %-10s | %-42s | %-17s | %-20s | %-20s | %-15s | %-12s%n",
+            System.out.printf("%-12s | %-10s | %-42s | %-17s | %-20s | %-20s | %-15s | %-12s |%n",
                     transacao.getData(), transacao.getHora(), transacao.getNomeOperacao(),
                     "        "+transacao.getCreditosGerados(), "          "+transacao.getCreditoReceber(),
                     "          "+transacao.getCreditoCompensado(), "        "+transacao.getSaldoAnterior(),
-                    "        "+transacao.getSaldoAtual());
+                    "      "+transacao.getSaldoAtual());
         }
     }
 }

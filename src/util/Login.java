@@ -21,29 +21,6 @@ public class Login{
         autenticarUsuario(credenciais, cookie);
         String strResponseBody1 = obterPaginaSaldoCartaoRU(cookie);
         String strResponseBody2 = obterPaginaPerfilUsuario(cookie);
-        System.out.println(strResponseBody1);
-
-        HistoricoTransacoes historico = new HistoricoTransacoes();
-
-        final String regex = "<tr class=\\\"\\w+\\\">\\s*<td><\\/td>\\s*<td style=\\\"text-align: center;\\\">\\s*(\\d{2}\\/\\d{2}\\/\\d{4})&nbsp;(\\d{2}:\\d{2})\\s*<\\/td>\\s*<td style=\\\"text-align: left;\\\" nowrap=\\\"nowrap\\\">\\s*((?:.+?)(?:&\\w+;)(?:.+))\\s+(?:\\(almo&ccedil;o\\))?\\s*<\\/td>\\s*<td style=\\\"text-align: right;\\\">\\s*<!-- 0 = TipoCompraCredito\\.COMPRA_GRU \\s*2 = TipoCompraCredito\\.Compra_PRESENCIAL-->\\s*(\\d+)\\s*<\\/td>\\s*(?:<!-- TipoCompraCredito\\.COMPENSACAO_GRU -->)?\\s*<td style=\\\"text-align: right;\\\">(\\d+)<\\/td>\\s*<td style=\\\"text-align: right; background-color: #ffff[ce][6c];\\\">\\s+(\\d+)\\s+<\\/td>\\s*<td style=\\\"text-align: right; background-color: #ffff[ce][6c];\\\">\\s*(\\d+)\\s*<\\/td>\\s*<td style=\\\"text-align: right; background-color: #ffff[ce][6c];\\\">\\s*(\\d+)\\s*<\\/td>\\s*<td style=\\\"text-align: right; background-color: #ffff[ce][6c];\\\">\\s*(\\d+)\\s*<\\/td>\\s*<\\/tr>";
-        final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
-        final Matcher matcher = pattern.matcher(strResponseBody1);
-
-        while (matcher.find()) {
-            Transacao transacao = new Transacao(
-                    matcher.group(1),
-                    matcher.group(2),
-                    matcher.group(3),
-                    matcher.group(4),
-                    matcher.group(5),
-                    matcher.group(6),
-                    matcher.group(7),
-                    matcher.group(8),
-                    matcher.group(9));
-            historico.adicionarTransacao(transacao);
-        }
-
-
 
         String nomeCompleto;
         nomeCompleto = AnalisadorRegex.localizarOcorrencia(ColecaoRegex.NOME_COMPLETO, strResponseBody1);
@@ -59,6 +36,8 @@ public class Login{
         strQRCode = AnalisadorRegex.localizarOcorrencia(ColecaoRegex.STRING_QRCODE, strResponseBody1);
         String URLPerfil;
         URLPerfil = AnalisadorRegex.localizarOcorrencia(ColecaoRegex.FOTO_DE_PERFIL, strResponseBody2);
+        HistoricoTransacoes historico;
+        historico = AnalisadorRegex.localizarTransacoes(strResponseBody1);
 
         new ControladorUsuario().criarNovoUsuario(
                 nomeCompleto,
