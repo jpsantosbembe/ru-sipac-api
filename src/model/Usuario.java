@@ -5,14 +5,16 @@ public class Usuario {
     private Perfil perfil;
     private Carteira carteira;
     private Credenciais credenciais;
-    private Usuario(Perfil perfil, Carteira carteira, Credenciais credenciais) {
+    private HistoricoTransacoes historicoTransacoes;
+    private Usuario(Perfil perfil, Carteira carteira, Credenciais credenciais, HistoricoTransacoes historicoTransacoes) {
         this.perfil = perfil;
         this.carteira = carteira;
         this.credenciais = credenciais;
+        this.historicoTransacoes = historicoTransacoes;
     }
-    public static Usuario getInstance(Perfil perfil, Carteira carteira, Credenciais credenciais) {
+    public static Usuario getInstance(Perfil perfil, Carteira carteira, Credenciais credenciais, HistoricoTransacoes historicoTransacoes) {
         if (instance == null) {
-            instance = new Usuario(perfil, carteira, credenciais);
+            instance = new Usuario(perfil, carteira, credenciais, historicoTransacoes);
         }
         return instance;
     }
@@ -33,5 +35,13 @@ public class Usuario {
     }
     public void setCredenciais(Credenciais credenciais) {
         this.credenciais = credenciais;
+    }
+
+    public HistoricoTransacoes getHistoricoTransacoes() {
+        return historicoTransacoes;
+    }
+
+    public void setHistoricoTransacoes(HistoricoTransacoes historicoTransacoes) {
+        this.historicoTransacoes = historicoTransacoes;
     }
 }

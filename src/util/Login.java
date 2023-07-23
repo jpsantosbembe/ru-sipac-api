@@ -43,20 +43,7 @@ public class Login{
             historico.adicionarTransacao(transacao);
         }
 
-        List<Transacao> todasTransacoes = historico.getTransacoes();
-        System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
-        System.out.printf("%-12s | %-10s | %-42s | %-17s | %-20s | %-20s | %-15s | %-12s%n",
-                "DATA", "HORA", "OPERACAO", "CREDITOS GERADOS", "CREDITOS A RECEBER",
-                "CREDITOS COMPENSADOS", "SALDO ANTERIOR", "SALDO ATUAL");
-        System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
 
-        for (Transacao transacao : todasTransacoes) {
-            System.out.printf("%-12s | %-10s | %-42s | %-17s | %-20s | %-20s | %-15s | %-12s%n",
-                    transacao.getData(), transacao.getHora(), transacao.getNomeOperacao(),
-                    "        "+transacao.getCreditosGerados(), "          "+transacao.getCreditoReceber(),
-                    "          "+transacao.getCreditoCompensado(), "        "+transacao.getSaldoAnterior(),
-                    "        "+transacao.getSaldoAtual());
-        }
 
         String nomeCompleto;
         nomeCompleto = AnalisadorRegex.localizarOcorrencia(ColecaoRegex.NOME_COMPLETO, strResponseBody1);
@@ -82,7 +69,8 @@ public class Login{
                 saldo,
                 strQRCode,
                 credenciais.getUsuario(),
-                credenciais.getSenha()
+                credenciais.getSenha(),
+                historico
         );
     }
     private String obterCookie() throws ExcecaoErroDeConectividade{

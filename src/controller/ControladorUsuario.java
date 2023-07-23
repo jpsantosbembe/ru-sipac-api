@@ -1,21 +1,18 @@
 package controller;
 
-import model.Carteira;
-import model.Credenciais;
-import model.Perfil;
-import model.Usuario;
+import model.*;
 
 public class ControladorUsuario {
     public void criarNovoUsuario(String nomeCompleto, String tipoDeVinculo, String situacaoDoVinculo, String URLFoto,
                                  String codigoCarteira, int saldoCarteira, String strQRCodeCarteira,
-                                 String nomeUsuario, String senhaUsuario) {
+                                 String nomeUsuario, String senhaUsuario, HistoricoTransacoes historicoTransacoes) {
         Perfil perfil = new Perfil(nomeCompleto, tipoDeVinculo, situacaoDoVinculo, URLFoto);
         Carteira carteira = new Carteira(codigoCarteira, saldoCarteira, strQRCodeCarteira);
         Credenciais credenciais = new Credenciais(nomeUsuario, senhaUsuario);
-        Usuario.getInstance(perfil, carteira, credenciais);
+        Usuario.getInstance(perfil, carteira, credenciais, historicoTransacoes);
     }
     public Usuario obterUsuario() {
-        return Usuario.getInstance(null, null, null);
+        return Usuario.getInstance(null, null, null, null);
     }
     public String consultarNomeUsuario (Usuario usuario) {
         return usuario.getPerfil().getNomeCompleto ();
