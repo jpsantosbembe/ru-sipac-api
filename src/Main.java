@@ -1,4 +1,5 @@
 import exception.ExcecaoErroDeConectividade;
+import exception.ExcecaoUsuarioSemCadastroRU;
 import exception.ExcecaoUsuarioSenhaInvalido;
 import model.Credenciais;
 import model.Transacao;
@@ -16,13 +17,14 @@ public class Main {
         );
         try {
             new Login().fazerLogin(credenciais);
-        } catch (ExcecaoErroDeConectividade | ExcecaoUsuarioSenhaInvalido e) {
+        } catch (ExcecaoErroDeConectividade | ExcecaoUsuarioSenhaInvalido | ExcecaoUsuarioSemCadastroRU e) {
             throw new RuntimeException(e);
         }
 
         Usuario usuario = new ControladorUsuario().obterUsuario();
 
         System.out.println(usuario.getPerfil().getNomeCompleto());
+        System.out.println(usuario.getPerfil().getMatricula());
         System.out.println(usuario.getPerfil().getTipoDeVinculo());
         System.out.println(usuario.getPerfil().getSituacaoDoVinculo());
         System.out.println(usuario.getPerfil().getURLFoto());

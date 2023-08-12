@@ -3,10 +3,10 @@ package controller;
 import model.*;
 
 public class ControladorUsuario {
-    public void criarNovoUsuario(String nomeCompleto, String tipoDeVinculo, String situacaoDoVinculo, String URLFoto,
+    public void criarNovoUsuario(String nomeCompleto, String matricula, String tipoDeVinculo, String situacaoDoVinculo, String URLFoto,
                                  String codigoCarteira, int saldoCarteira, String strQRCodeCarteira,
                                  String nomeUsuario, String senhaUsuario, HistoricoTransacoes historicoTransacoes) {
-        Perfil perfil = new Perfil(nomeCompleto, tipoDeVinculo, situacaoDoVinculo, URLFoto);
+        Perfil perfil = new Perfil(nomeCompleto, matricula, tipoDeVinculo, situacaoDoVinculo, URLFoto);
         Carteira carteira = new Carteira(codigoCarteira, saldoCarteira, strQRCodeCarteira);
         Credenciais credenciais = new Credenciais(nomeUsuario, senhaUsuario);
         Usuario.getInstance(perfil, carteira, credenciais, historicoTransacoes);

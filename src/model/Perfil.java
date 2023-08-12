@@ -2,11 +2,13 @@ package model;
 
 public class Perfil {
     private String nomeCompleto;
+    private String matricula;
     private String tipoDeVinculo;
     private String situacaoDoVinculo;
     private String URLFoto;
-    public Perfil(String nomeCompleto, String tipoDeVinculo, String situacaoDoVinculo, String URLFoto) {
+    public Perfil(String nomeCompleto, String matricula, String tipoDeVinculo, String situacaoDoVinculo, String URLFoto) {
         this.nomeCompleto = nomeCompleto;
+        this.matricula = matricula;
         this.tipoDeVinculo = tipoDeVinculo;
         this.situacaoDoVinculo = situacaoDoVinculo;
         this.URLFoto = URLFoto;
@@ -34,5 +36,13 @@ public class Perfil {
     }
     public void setURLFoto(String URLFoto) {
         this.URLFoto = URLFoto;
+    }
+
+    public String getMatricula() {
+        return matricula;
+    }
+
+    public void setMatricula(String matricula) {
+        this.matricula = matricula;
     }
 }

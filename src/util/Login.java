@@ -2,12 +2,15 @@ package util;
 
 import controller.ControladorUsuario;
 import exception.ExcecaoErroDeConectividade;
+import exception.ExcecaoUsuarioSemCadastroRU;
 import exception.ExcecaoUsuarioSenhaInvalido;
 import helper.AnalisadorRegex;
 import model.Credenciais;
 import model.HistoricoTransacoes;
 import model.Transacao;
 import okhttp3.Response;
+
+import java.awt.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
@@ -15,7 +18,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Login{
-    public void fazerLogin(Credenciais credenciais) throws ExcecaoUsuarioSenhaInvalido, ExcecaoErroDeConectividade {
+    public void fazerLogin(Credenciais credenciais) throws ExcecaoUsuarioSenhaInvalido, ExcecaoErroDeConectividade, ExcecaoUsuarioSemCadastroRU {
 
         String cookie = obterCookie();
         autenticarUsuario(credenciais, cookie);
@@ -24,6 +27,8 @@ public class Login{
 
         String nomeCompleto;
         nomeCompleto = AnalisadorRegex.localizarOcorrencia(ColecaoRegex.NOME_COMPLETO, strResponseBody1);
+        String matricula;
+        matricula = AnalisadorRegex.localizarOcorrencia(ColecaoRegex.MATRICULA, strResponseBody2).replace(" ", "");
         String codigo;
         codigo = AnalisadorRegex.localizarOcorrencia(ColecaoRegex.CODIGO, strResponseBody1);
         String situacaoDoVinculo;
@@ -41,6 +46,7 @@ public class Login{
 
         new ControladorUsuario().criarNovoUsuario(
                 nomeCompleto,
+                matricula,
                 tipoDeVinculo,
                 situacaoDoVinculo,
                 URLPerfil,
@@ -79,16 +85,20 @@ public class Login{
         }
 
     }
-    private String obterPaginaSaldoCartaoRU(String cookie) throws ExcecaoErroDeConectividade {
+    private String obterPaginaSaldoCartaoRU(String cookie) throws ExcecaoErroDeConectividade, ExcecaoUsuarioSemCadastroRU {
         try {
             ServicoHttp servicoHttp = new ServicoHttp();
-            return servicoHttp.fazerRequisicaoHttpPOST(Endpoints.SALDO_RU_SIPAC,
+
+            String respostaSipac = servicoHttp.fazerRequisicaoHttpPOST(Endpoints.SALDO_RU_SIPAC,
                     "formmenuadm=formmenuadm&jscook_action=formmenuadm_menuaaluno_menu%3AA%5D%23%7BsaldoCartao.iniciar%7D&javax.faces.ViewState=j_id1",
                     cookie);
+            if (AnalisadorRegex.localizarOcorrencia(ColecaoRegex.USUARIO_SEM_CADASTRO_RU, respostaSipac) != null) {
+                throw new ExcecaoUsuarioSemCadastroRU();
+            }
+            return  respostaSipac;
         } catch (IOException e) {
             throw new ExcecaoErroDeConectividade();
         }
-
     }
     private String obterPaginaPerfilUsuario(String cookie) throws ExcecaoErroDeConectividade {
         try {
